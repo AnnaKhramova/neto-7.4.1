@@ -29,56 +29,17 @@ public class Main {
         AtomicReference<String> aStr = new AtomicReference<>("");
         AtomicInteger aMax = new AtomicInteger(0);
         Thread aThread = new Thread(() -> {
-            String cur = "";
-            for (int i = 0; i < STR_COUNT; i++) {
-                try {
-                    cur = aQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int curMax = (int) cur.chars().filter(ch -> ch == 'a').count();
-                if (curMax > aMax.get()) {
-                    aStr.set(cur);
-                    aMax.set(curMax);
-                    System.out.println("Max a: " + aMax);
-                }
-            }
+            charCount(aMax, aStr, 'a', aQueue);
         });
         AtomicReference<String> bStr = new AtomicReference<>("");
         AtomicInteger bMax = new AtomicInteger(0);
         Thread bThread = new Thread(() -> {
-            String cur = "";
-            for (int i = 0; i < STR_COUNT; i++) {
-                try {
-                    cur = bQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int curMax = (int) cur.chars().filter(ch -> ch == 'b').count();
-                if (curMax > bMax.get()) {
-                    bStr.set(cur);
-                    bMax.set(curMax);
-                    System.out.println("Max b: " + bMax);
-                }
-            }
+            charCount(bMax, bStr, 'b', bQueue);
         });
         AtomicReference<String> cStr = new AtomicReference<>("");
         AtomicInteger cMax = new AtomicInteger(0);
         Thread cThread = new Thread(() -> {
-            String cur = "";
-            for (int i = 0; i < STR_COUNT; i++) {
-                try {
-                    cur = cQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                int curMax = (int) cur.chars().filter(ch -> ch == 'c').count();
-                if (curMax > cMax.get()) {
-                    cStr.set(cur);
-                    cMax.set(curMax);
-                    System.out.println("Max c: " + cMax);
-                }
-            }
+            charCount(cMax, cStr, 'c', cQueue);
         });
 
         fillThread.start();
@@ -103,5 +64,22 @@ public class Main {
             text.append(letters.charAt(random.nextInt(letters.length())));
         }
         return text.toString();
+    }
+
+    public static void charCount(AtomicInteger max, AtomicReference<String> str, char ch, BlockingQueue<String> queue) {
+        String cur = "";
+        for (int i = 0; i < STR_COUNT; i++) {
+            try {
+                cur = queue.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            int curMax = (int) cur.chars().filter(c -> c == ch).count();
+            if (curMax > max.get()) {
+                str.set(cur);
+                max.set(curMax);
+                System.out.println("Max " + ch + ": " + max);
+            }
+        }
     }
 }
